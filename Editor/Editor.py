@@ -86,6 +86,7 @@ class Editor(QMainWindow):
         # FILE TAB
         self.menuBar.new_file.connect(self.page_control.open_tab)
         self.menuBar.open_file.connect(self.open_file_dialog)
+        self.menuBar.open_recent_file.connect(self.open_file)
         self.menuBar.save_file.connect(self.save_file)
         self.menuBar.save_file_as.connect(self.save_file_as)
         # EDIT TAB
@@ -116,6 +117,30 @@ class Editor(QMainWindow):
         font = QFontDialog().getFont()[0]
         self.change_font(font)
 
+    @staticmethod
+    def open_recent():
+        result = []
+        with open("data.txt", "r") as file:
+            lines = file.readlines()
+            for line in lines:
+                result.append(line[:-1])
+                # print(line)
+        # print(result)
+        return result
+
+    @staticmethod
+    def save_in_recent(path):
+        with open("data.txt", "r") as file:
+            lines = file.readlines()
+            length = len(lines)
+        if length == 5:
+            with open('data.txt', 'w') as file:
+                file.writelines(lines[1:])
+            length -= 1
+        if length < 5:
+            with open('data.txt', 'a') as f2:
+                f2.write(path + "\n")
+
     def open_file(self, file_name):
         with open(file_name, 'r') as file:
             self.page_control.currentWidget().setText(file.read())
@@ -129,6 +154,9 @@ class Editor(QMainWindow):
         self.page_control.currentWidget().filePath = file_name
         self.page_control.setTabText(self.page_control.currentIndex(), shortened_file_name)
         self.page_control.currentWidget().change_margin_width()
+        self.save_in_recent(file_name)
+        # self.menuBar.change_file_menu(True)
+        self.menuBar.update_recent(True)
         self.update_window_title()
 
     def open_file_dialog(self):
@@ -143,6 +171,9 @@ class Editor(QMainWindow):
                 text = self.page_control.currentWidget().text()
                 with open(file_name, 'w') as file:
                     file.write(text)
+                self.save_in_recent(file_name)
+                self.menuBar.change_file_menu(True)
+                self.menuBar.update_recent(True)
             self.change_font(self.font())
         else:
             self.save_file_as()
@@ -156,11 +187,17 @@ class Editor(QMainWindow):
             text = self.page_control.currentWidget().text()
             with open(file_name, 'w') as file:
                 file.write(text)
+            self.save_in_recent(file_name)
+            self.menuBar.change_file_menu(True)
+            self.menuBar.update_recent(True)
         self.change_font(self.font())
 
     def tab_changed(self):
         if self.page_control.count() > 1:
             self.update_window_title()
+
+    def update_recent_list(self):
+        pass
 
     def update_window_title(self):
         self.setWindowTitle(self.page_control.tabText(self.page_control.currentIndex()) + " - TextEditor")

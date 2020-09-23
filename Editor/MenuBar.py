@@ -1,3 +1,4 @@
+import os
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QMenuBar
@@ -9,6 +10,7 @@ class MenuBar(QMenuBar):
     """
     new_file = pyqtSignal()
     open_file = pyqtSignal()
+    open_recent_file = pyqtSignal(str)
     save_file = pyqtSignal()
     save_file_as = pyqtSignal()
     undo_edit = pyqtSignal()
@@ -26,12 +28,60 @@ class MenuBar(QMenuBar):
         self.editMenu = None
         self.settingsMenu = None
         self.helpMenu = None
+        self.recent_docs_menu = None
+        self.actions = {}
+        self.recent_docs = []
+        self.recent_actions = []
         self.change_file_menu()
         self.create_edit_menu()
         self.create_settings_menu()
         self.create_help_menu()
 
-    def change_file_menu(self):
+    @staticmethod
+    def open_recent():
+        result = []
+        with open("data.txt", "r") as file:
+            lines = file.readlines()
+            for line in lines:
+                result.append(line[:-1])
+        return result
+
+    def update_recent(self, checker=False):
+        if checker:
+            for _ in self.fileMenu.recent_docs_menu.actions():
+                self.fileMenu.recent_docs_menu.removeAction(_)
+        else:
+            self.recent_docs = self.open_recent()
+            count = 0
+            for recent_doc in self.recent_docs:
+                print(recent_doc)
+                self.actions[count] = QAction("{}".format(os.path.basename(recent_doc)), self)
+                self.actions[count].triggered.connect(lambda: self.open_recent_file.emit(recent_doc))
+                self.recent_actions.append(self.actions[count])
+                count += 1
+            self.recent_docs_menu.addActions(self.recent_actions)
+            for _ in self.recent_docs_menu.actions():
+                print(_)
+            print()
+
+    # def update_recent(self, checker=False):
+    #     if checker:
+    #         count = 0
+    #         for _ in self.actions:
+    #             self.recent_docs_menu.removeAction(self.actions[count])
+    #             count += 1
+    #     self.recent_docs = self.open_recent()
+    #     count = 0
+    #     for recent_doc in self.recent_docs:
+    #         print(recent_doc)
+    #         self.actions[count] = QAction("{}".format(os.path.basename(recent_doc)), self)
+    #         self.actions[count].triggered.connect(lambda: self.open_recent_file.emit(recent_doc))
+    #         self.recent_actions.append(self.actions[count])
+    #         count += 1
+    #     self.recent_docs_menu.addActions(self.recent_actions)
+    #     print()
+
+    def change_file_menu(self, checker=False):
         # New File
         new_file_action = QAction(QIcon("static/new.png"), 'New File', self)
         new_file_action.setShortcut("Ctrl+N")
@@ -57,13 +107,19 @@ class MenuBar(QMenuBar):
         quit_action.setShortcut("Ctrl+Q")
         quit_action.setStatusTip("Quit EasyEdit")
         quit_action.triggered.connect(lambda: QApplication.quit())
-        # Adding actions to file menu
-        self.fileMenu = self.addMenu("File")
-        self.fileMenu.addAction(new_file_action)
-        self.fileMenu.addAction(open_file_action)
-        self.fileMenu.addAction(save_file_action)
-        self.fileMenu.addAction(save_file_as_action)
-        self.fileMenu.addAction(quit_action)
+
+        if not checker:
+            # Adding actions to file menu
+            self.fileMenu = self.addMenu("File")
+            self.fileMenu.addAction(new_file_action)
+            self.fileMenu.addAction(open_file_action)
+            self.fileMenu.addAction(save_file_action)
+            self.fileMenu.addAction(save_file_as_action)
+            self.recent_docs_menu = self.fileMenu.addMenu("Recent Docs")
+            self.update_recent()
+            self.fileMenu.addAction(quit_action)
+        else:
+            self.update_recent(True)
 
     def create_edit_menu(self):
         # Undo
