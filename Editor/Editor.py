@@ -124,8 +124,6 @@ class Editor(QMainWindow):
             lines = file.readlines()
             for line in lines:
                 result.append(line[:-1])
-                # print(line)
-        # print(result)
         return result
 
     @staticmethod
@@ -155,7 +153,6 @@ class Editor(QMainWindow):
         self.page_control.setTabText(self.page_control.currentIndex(), shortened_file_name)
         self.page_control.currentWidget().change_margin_width()
         self.save_in_recent(file_name)
-        # self.menuBar.change_file_menu(True)
         self.menuBar.update_recent(True)
         self.update_window_title()
 

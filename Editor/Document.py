@@ -26,10 +26,6 @@ class Document(QsciScintilla):
         return self.languageToFile.get(self.currentLanguage)
 
     def change_lexer(self, lexer):
-        # if lexer is not None:
-        #     new_lexer = self.languageToLexer.get(lexer)(self)
-        # else:
-        #     new_lexer = lexer
         new_lexer = lexer
         self.setLexer(new_lexer)
         self.currentLanguage = lexer

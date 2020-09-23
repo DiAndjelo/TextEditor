@@ -48,38 +48,21 @@ class MenuBar(QMenuBar):
 
     def update_recent(self, checker=False):
         if checker:
-            for _ in self.fileMenu.recent_docs_menu.actions():
-                self.fileMenu.recent_docs_menu.removeAction(_)
-        else:
-            self.recent_docs = self.open_recent()
-            count = 0
-            for recent_doc in self.recent_docs:
-                print(recent_doc)
-                self.actions[count] = QAction("{}".format(os.path.basename(recent_doc)), self)
-                self.actions[count].triggered.connect(lambda: self.open_recent_file.emit(recent_doc))
-                self.recent_actions.append(self.actions[count])
-                count += 1
-            self.recent_docs_menu.addActions(self.recent_actions)
             for _ in self.recent_docs_menu.actions():
-                print(_)
-            print()
-
-    # def update_recent(self, checker=False):
-    #     if checker:
-    #         count = 0
-    #         for _ in self.actions:
-    #             self.recent_docs_menu.removeAction(self.actions[count])
-    #             count += 1
-    #     self.recent_docs = self.open_recent()
-    #     count = 0
-    #     for recent_doc in self.recent_docs:
-    #         print(recent_doc)
-    #         self.actions[count] = QAction("{}".format(os.path.basename(recent_doc)), self)
-    #         self.actions[count].triggered.connect(lambda: self.open_recent_file.emit(recent_doc))
-    #         self.recent_actions.append(self.actions[count])
-    #         count += 1
-    #     self.recent_docs_menu.addActions(self.recent_actions)
-    #     print()
+                self.recent_docs_menu.removeAction(_)
+        self.recent_docs = self.open_recent()
+        count = 0
+        for recent_doc in self.recent_docs:
+            print(recent_doc)
+            self.actions[count] = QAction("{}".format(os.path.basename(recent_doc)), self)
+            self.actions[count].triggered.connect(lambda: self.open_recent_file.emit(recent_doc))
+            self.recent_actions.append(self.actions[count])
+            count += 1
+        self.recent_docs_menu.addActions(self.recent_actions)
+        self.recent_actions = []
+        for _ in self.recent_docs_menu.actions():
+            print(_)
+        print()
 
     def change_file_menu(self, checker=False):
         # New File
