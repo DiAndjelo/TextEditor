@@ -3,4 +3,4 @@
 1. Install Python 3
 2. Install requirements. 
 "pip install -r requirements.txt"
-3. Start entrypoint
+3. Start entrypoint
