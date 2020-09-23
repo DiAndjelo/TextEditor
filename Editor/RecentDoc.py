@@ -1,6 +1,38 @@
+import os
+
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction, QWidget
 
 
 class RecentDoc(QWidget):
-    def __init__(self):
+    open_recent_file = pyqtSignal()
+
+    def __init__(self, parent):
         super().__init__()
+        self.parent = parent
+        self.actions = {}
+        self.recent_docs = []
+        self.recent_actions = []
+
+    @staticmethod
+    def open_recent():
+        result = []
+        with open("data.txt", "r") as file:
+            lines = file.readlines()
+            for line in lines:
+                result.append(line[:-1])
+        return result
+
+    def update_recent(self, checker=False):
+        if checker:
+            for _ in self.parent.recent_docs_menu.actions():
+                self.parent.recent_docs_menu.removeAction(_)
+        self.recent_docs = self.open_recent()
+        count = 0
+        for recent_doc in reversed(self.recent_docs):
+            self.actions[count] = QAction("{}".format(os.path.basename(recent_doc)), self)
+            self.actions[count].triggered.connect(lambda: self.open_recent_file.emit(recent_doc))
+            self.recent_actions.append(self.actions[count])
+            count += 1
+        self.parent.recent_docs_menu.addActions(self.recent_actions)
+        self.recent_actions = []

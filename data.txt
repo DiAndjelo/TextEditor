@@ -1,5 +1,3 @@
 E:/work/projects/TextEditor/1.txt
 E:/work/projects/TextEditor/2.txt
 E:/work/projects/TextEditor/3.txt
-E:/work/projects/TextEditor/6.txt
-E:/work/projects/TextEditor/1.txt

@@ -130,14 +130,26 @@ class Editor(QMainWindow):
     def save_in_recent(path):
         with open("data.txt", "r") as file:
             lines = file.readlines()
+            list_of_lines = []
+            for line in lines:
+                list_of_lines.append(line)
             length = len(lines)
         if length == 5:
             with open('data.txt', 'w') as file:
-                file.writelines(lines[1:])
+                if path == list_of_lines[-1]:
+                    file.writelines(lines)
+                else:
+                    file.writelines(lines[1:])
             length -= 1
-        if length < 5:
+        if length == 0:
+            with open('data.txt', 'w') as file:
+                file.write(path + "\n")
+        elif length < 5:
             with open('data.txt', 'a') as f2:
-                f2.write(path + "\n")
+                if path == list_of_lines[-1]:
+                    f2.writelines(lines)
+                else:
+                    f2.write(path + "\n")
 
     def open_file(self, file_name):
         with open(file_name, 'r') as file:
@@ -153,7 +165,7 @@ class Editor(QMainWindow):
         self.page_control.setTabText(self.page_control.currentIndex(), shortened_file_name)
         self.page_control.currentWidget().change_margin_width()
         self.save_in_recent(file_name)
-        self.menuBar.update_recent(True)
+        self.menuBar.recent_doc.update_recent(True)
         self.update_window_title()
 
     def open_file_dialog(self):
@@ -170,7 +182,7 @@ class Editor(QMainWindow):
                     file.write(text)
                 self.save_in_recent(file_name)
                 self.menuBar.change_file_menu(True)
-                self.menuBar.update_recent(True)
+                self.menuBar.recent_doc.update_recent(True)
             self.change_font(self.font())
         else:
             self.save_file_as()
@@ -186,7 +198,7 @@ class Editor(QMainWindow):
                 file.write(text)
             self.save_in_recent(file_name)
             self.menuBar.change_file_menu(True)
-            self.menuBar.update_recent(True)
+            self.menuBar.recent_doc.update_recent(True)
         self.change_font(self.font())
 
     def tab_changed(self):
