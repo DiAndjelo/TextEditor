@@ -1,10 +1,12 @@
 import os
-
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction, QWidget
 
 
 class RecentDoc(QWidget):
+    """
+    Recent Docs class
+    """
     open_recent_file = pyqtSignal()
 
     def __init__(self, parent):

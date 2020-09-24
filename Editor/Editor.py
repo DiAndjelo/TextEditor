@@ -1,10 +1,11 @@
 from os.path import split
 from PyQt5.QtCore import QSettings, QPoint, QSize, pyqtSlot
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QFileDialog, QFontDialog, QMainWindow
+from PyQt5.QtWidgets import QFileDialog, QFontDialog, QMainWindow, QMessageBox
 from .About import About
 from .MenuBar import MenuBar
 from .PageControl import PageControl
+from .Quit import Quit
 
 
 class Editor(QMainWindow):
@@ -20,8 +21,9 @@ class Editor(QMainWindow):
         self.read_window_settings()
         self.about = About()
         self.menuBar = MenuBar()
+        self.quit = Quit()
         self.setMenuBar(self.menuBar)
-        self.page_control = PageControl()
+        self.page_control = PageControl(self)
         self.read_page_control_settings()
         self.setCentralWidget(self.page_control)
         self.change_font(self.font())
@@ -214,3 +216,22 @@ class Editor(QMainWindow):
     @pyqtSlot(int, int)
     def update_status_bar_text(self, line, column):
         self.statusBar.showMessage("Line {}, Column {}".format(line, column))
+
+    def closeEvent(self, event):
+        """Generate 'question' dialog on clicking 'X' button in title bar.
+
+        Reimplement the closeEvent() event handler to include a 'Question'
+        dialog with options on how to proceed - Save, Close, Cancel buttons
+        """
+        reply = QMessageBox.question(
+            self, "Message",
+            "Are you sure you want to quit? Any unsaved work will be lost.",
+            QMessageBox.Save | QMessageBox.Close | QMessageBox.Cancel,
+            QMessageBox.Save)
+
+        if reply == QMessageBox.Close:
+            self.quit()
+        if reply == QMessageBox.Save:
+            self.save_file()
+        else:
+            event.ignore()
