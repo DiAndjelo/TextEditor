@@ -1,6 +1,6 @@
-from time import sleep
+import re
 
-from PyQt5.QtWidgets import QApplication, QTabWidget, QMessageBox
+from PyQt5.QtWidgets import QTabWidget, QMessageBox
 from .Document import Document
 
 
@@ -24,38 +24,36 @@ class PageControl(QTabWidget):
         self.setCurrentIndex(self.count() - 1)
 
     def closeEvent(self, event):
-        """Generate 'question' dialog on clicking 'X' button in title bar.
-
-        Reimplement the closeEvent() event handler to include a 'Question'
-        dialog with options on how to proceed - Save, Close, Cancel buttons
-        """
         reply = QMessageBox.question(
             self, "Message",
             "Are you sure you want to quit? Any unsaved work will be lost.",
             QMessageBox.Save | QMessageBox.Close | QMessageBox.Cancel,
             QMessageBox.Save)
-
         if reply == QMessageBox.Close:
             event.accept()
         else:
             event.ignore()
 
     def close_tab(self, index):
-        reply = QMessageBox.question(
-            self, "Message",
-            "Are you sure you want to quit? Any unsaved work will be lost.",
-            QMessageBox.Save | QMessageBox.Close | QMessageBox.Cancel,
-            QMessageBox.Save)
-
-        if reply == QMessageBox.Close:
+        pattern = re.compile('Untitled')
+        res = pattern.findall(self.tabText(index))
+        if res:
             self.removeTab(index)
-            # if self.count() == 0:
-            #     QApplication.quit()
-        elif reply == QMessageBox.Save:
-            self.parent.save_file()
-            self.removeTab(index)
-            # if self.count() == 0:
-            #     QApplication.quit()
+        else:
+            reply = QMessageBox.question(
+                self, "Message",
+                "Are you sure you want to quit? Any unsaved work will be lost.",
+                QMessageBox.Save | QMessageBox.Close | QMessageBox.Cancel,
+                QMessageBox.Save)
+            if reply == QMessageBox.Close:
+                self.removeTab(index)
+                # if self.count() == 0:
+                #     QApplication.quit()
+            elif reply == QMessageBox.Save:
+                self.parent.save_file()
+                self.removeTab(index)
+                # if self.count() == 0:
+                #     QApplication.quit()
 
 
 """

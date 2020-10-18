@@ -218,17 +218,11 @@ class Editor(QMainWindow):
         self.statusBar.showMessage("Line {}, Column {}".format(line, column))
 
     def closeEvent(self, event):
-        """Generate 'question' dialog on clicking 'X' button in title bar.
-
-        Reimplement the closeEvent() event handler to include a 'Question'
-        dialog with options on how to proceed - Save, Close, Cancel buttons
-        """
         reply = QMessageBox.question(
             self, "Message",
             "Are you sure you want to quit? Any unsaved work will be lost.",
             QMessageBox.Save | QMessageBox.Close | QMessageBox.Cancel,
             QMessageBox.Save)
-
         if reply == QMessageBox.Close:
             self.quit()
         if reply == QMessageBox.Save:

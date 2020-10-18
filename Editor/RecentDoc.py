@@ -7,7 +7,7 @@ class RecentDoc(QWidget):
     """
     Recent Docs class
     """
-    open_recent_file = pyqtSignal()
+    # open_recent_file = pyqtSignal()
 
     def __init__(self, parent):
         super().__init__()
@@ -32,9 +32,9 @@ class RecentDoc(QWidget):
         self.recent_docs = self.open_recent()
         count = 0
         for recent_doc in reversed(self.recent_docs):
-            self.actions[count] = QAction("{}".format(os.path.basename(recent_doc)), self)
-            self.actions[count].triggered.connect(lambda: self.open_recent_file.emit(recent_doc))
-            self.recent_actions.append(self.actions[count])
+            self.actions[f'{count}'] = QAction("{}".format(os.path.basename(recent_doc)), self)
+            self.actions[f'{count}'].triggered.connect(lambda: self.parent.open_recent_file.emit(recent_doc))
+            self.recent_actions.append(self.actions[f'{count}'])
             count += 1
         self.parent.recent_docs_menu.addActions(self.recent_actions)
         self.recent_actions = []
