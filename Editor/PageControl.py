@@ -1,6 +1,6 @@
 import re
-
-from PyQt5.QtWidgets import QTabWidget, QMessageBox
+from os.path import split
+from PyQt5.QtWidgets import QTabWidget, QMessageBox, QTextEdit
 from .Document import Document
 
 
@@ -16,7 +16,7 @@ class PageControl(QTabWidget):
         self.tabCloseRequested.connect(self.close_tab)
 
     def open_tab(self):
-        text_widget = Document()
+        text_widget = Document(self, self.count())
         if self.count() == 0:
             self.addTab(text_widget, "Untitled")
         else:
@@ -37,8 +37,13 @@ class PageControl(QTabWidget):
     def close_tab(self, index):
         pattern = re.compile('Untitled')
         res = pattern.findall(self.tabText(index))
-        if res:
+        all_saved_files = self.parent.get_saved_files()
+        if res or (self.tabText(index) in all_saved_files):
             self.removeTab(index)
+            if len(all_saved_files) <= 1:
+                self.parent.clean_saved_files()
+            else:
+                self.parent.remove_from_saved_files(self.tabText(index))
         else:
             reply = QMessageBox.question(
                 self, "Message",

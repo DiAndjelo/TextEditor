@@ -26,9 +26,10 @@ class Editor(QMainWindow):
         self.page_control = PageControl(self)
         self.read_page_control_settings()
         self.setCentralWidget(self.page_control)
-        self.change_font(self.font())
+        # self.change_font(self.font())
         self.statusBar = self.statusBar()
         self.configure_signals()
+        self.saved_files = []
         self.show()
 
     def read_window_settings(self):
@@ -104,16 +105,16 @@ class Editor(QMainWindow):
         # TAB BAR
         self.page_control.currentChanged.connect(self.tab_changed)
         # TEXT AREA
-        self.menuBar.change_language.connect(self.change_language)
+        # self.menuBar.change_language.connect(self.change_language)
 
-    def change_language(self, language):
-        self.page_control.currentWidget().change_lexer(language)
-        self.change_font(self.font())
+    # def change_language(self, language):
+    #     self.page_control.currentWidget().change_lexer(language)
+    #     self.change_font(self.font())
 
-    def change_font(self, new_font):
-        self.setFont(new_font)
-        for i in range(self.page_control.count()):
-            self.page_control.widget(i).update_font(new_font)
+    # def change_font(self, new_font):
+    #     self.setFont(new_font)
+    #     for i in range(self.page_control.count()):
+    #         self.page_control.widget(i).update_font(new_font)
 
     def change_font_dialog(self):
         font = QFontDialog().getFont()[0]
@@ -158,50 +159,54 @@ class Editor(QMainWindow):
             self.page_control.currentWidget().setText(file.read())
         shortened_file_name = split(file_name)[1]
         extension = shortened_file_name.split('.')
-        if len(extension) == 2:
-            language = self.fileToLanguage.get(extension[1])
-            self.change_language(language)
-        else:
-            self.change_language(None)
+        # if len(extension) == 2:
+        #     language = self.fileToLanguage.get(extension[1])
+        #     self.change_language(language)
+        # else:
+        #     self.change_language(None)
         self.page_control.currentWidget().filePath = file_name
         self.page_control.setTabText(self.page_control.currentIndex(), shortened_file_name)
-        self.page_control.currentWidget().change_margin_width()
+        # self.page_control.currentWidget().change_margin_width()
         self.save_in_recent(file_name)
         self.menuBar.recent_doc.update_recent(True)
+        self.page_control.currentWidget().remove_is_changed()
         self.update_window_title()
 
     def open_file_dialog(self):
         file_name = QFileDialog.getOpenFileName(self, "Open File")[0]
         if file_name != "":
             self.open_file(file_name)
+            self.saved_files.append(file_name)
 
     def save_file(self):
         if self.page_control.currentWidget().filePath != "Untitled":
             file_name = self.page_control.currentWidget().filePath
             if file_name != "":
-                text = self.page_control.currentWidget().text()
+                text = self.page_control.currentWidget().toPlainText()
+                self.page_control.currentWidget().remove_is_changed_for_save()
                 with open(file_name, 'w') as file:
                     file.write(text)
                 self.save_in_recent(file_name)
+                self.saved_files.append(file_name)
                 self.menuBar.change_file_menu(True)
                 self.menuBar.recent_doc.update_recent(True)
-            self.change_font(self.font())
         else:
             self.save_file_as()
 
     def save_file_as(self):
-        file_name = QFileDialog.getSaveFileName(self, "Save File", None, self.page_control.currentWidget().get_file_type())[0]
+        file_name = QFileDialog.getSaveFileName(self, "Save File", None, '.txt')[0]
         if file_name != "":
             shortened_file_name = split(file_name)[1]
             self.page_control.setTabText(self.page_control.currentIndex(), shortened_file_name)
+            self.page_control.currentWidget().remove_is_changed()
             self.update_window_title()
-            text = self.page_control.currentWidget().text()
+            text = self.page_control.currentWidget().toPlainText()
             with open(file_name, 'w') as file:
                 file.write(text)
             self.save_in_recent(file_name)
+            self.saved_files.append(file_name)
             self.menuBar.change_file_menu(True)
             self.menuBar.recent_doc.update_recent(True)
-        self.change_font(self.font())
 
     def tab_changed(self):
         if self.page_control.count() > 1:
@@ -229,3 +234,19 @@ class Editor(QMainWindow):
             self.save_file()
         else:
             event.ignore()
+
+    def get_saved_files(self):
+        shortened_saved_files = []
+        for recent in self.saved_files:
+            shortened_saved_files.append(split(recent)[1])
+        return shortened_saved_files
+
+    def remove_from_saved_files(self, file_name):
+        saved_files_list = self.saved_files
+        if file_name in self.get_saved_files():
+            for saved_file in saved_files_list:
+                if file_name in saved_file:
+                    self.saved_files.remove(file_name)
+
+    def clean_saved_files(self):
+        self.saved_files = []
