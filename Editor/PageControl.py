@@ -38,7 +38,7 @@ class PageControl(QTabWidget):
         pattern = re.compile('Untitled')
         res = pattern.findall(self.tabText(index))
         all_saved_files = self.parent.get_saved_files()
-        if res or (self.tabText(index) in all_saved_files):
+        if (res and '*' not in self.tabText(index)) or (self.tabText(index) in all_saved_files):
             self.removeTab(index)
             if len(all_saved_files) <= 1:
                 self.parent.clean_saved_files()
